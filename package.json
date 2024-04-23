@@ -12,14 +12,8 @@
   "dependencies": {
     "@tauri-apps/api": "^1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
-  "imports": {
-    "#components": "./src/components",
-    "#layouts": "./src/layouts",
-    "#pages": "./src/pages",
-    "#hooks": "./src/hooks",
-    "#utils": "./src/utils"
+    "react-dom": "^18.2.0",
+    "react-hotkeys-hook": "^4.5.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1",
