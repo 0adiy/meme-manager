@@ -14,10 +14,18 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
+  "imports": {
+    "#components": "./src/components",
+    "#layouts": "./src/layouts",
+    "#pages": "./src/pages",
+    "#hooks": "./src/hooks",
+    "#utils": "./src/utils"
+  },
   "devDependencies": {
     "@tauri-apps/cli": "^1",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
+    "daisyui": "^4.10.2",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.3",
     "vite": "^5.0.0"
