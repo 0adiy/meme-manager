@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
 import GridView from "./layouts/GridView.jsx";
-import { useHotkeys } from "react-hotkeys-hook";
+import SearchBox from "./components/SearchBox.jsx";
+import ListView from "./layouts/ListView.jsx";
+import { TableCellsIcon, QueueListIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 
 const items = [
   {
@@ -9,6 +10,8 @@ const items = [
     title: "The Godfather",
     year: 1972,
     rating: 1.5,
+    description:
+      "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
     poster:
       "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
   },
@@ -17,6 +20,8 @@ const items = [
     title: "The Godfather: Part II",
     year: 1974,
     rating: 3.0,
+    description:
+      "The early life and career of Vito Corleone in 1920s New York is portrayed while his son, Michael, expands and tightens his grip on his crime syndicate.",
     poster:
       "https://www4.yts.nz/assets/images/movies/The_Godfather_Part_II_1974/large-cover.jpg",
   },
@@ -25,6 +30,8 @@ const items = [
     title: "The Godfather: Part III",
     year: 1990,
     rating: 3.5,
+    description:
+      "In the continuing saga of the Corleone crime family, a young Vito Corleone grows up in Sicily and in 1910s New York.",
     poster:
       "https://www4.yts.nz/assets/images/movies/The_Godfather_Part_III_1990/large-cover.jpg",
   },
@@ -33,6 +40,8 @@ const items = [
     title: "The Dark Knight",
     year: 2008,
     rating: 4.5,
+    description:
+      "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
     poster:
       "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg",
   },
@@ -41,6 +50,8 @@ const items = [
     title: "The Dark Knight Rises",
     year: 2012,
     rating: 4.0,
+    description:
+      "Eight years after the Joker's reign of anarchy, Batman, with the help of the enigmatic Catwoman, is forced from his exile to save Gotham City from the brutal guerrera of the Joker.",
     poster:
       "https://m.media-amazon.com/images/M/MV5BMTk4ODQzNDY3Ml5BMl5BanBnXkFtZTcwODA0NTM4Nw@@._V1_SX300.jpg",
   },
@@ -49,6 +60,8 @@ const items = [
     title: "Atomic Blonde",
     year: 2021,
     rating: 3.0,
+    description:
+      "A mysterious young woman, on a quest to save her family from the dark side of the law, discovers that she is the inner woman of the mysterious organization she works for.",
     poster:
       "https://www4.yts.nz/assets/images/movies/atomic_blonde_2017/medium-cover.jpg",
   },
@@ -57,53 +70,49 @@ const items = [
     title: "The Matrix",
     year: 1999,
     rating: 4.0,
+    description:
+      "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
     poster:
       "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
   },
 ];
 
 function App() {
-  const [term, setTerm] = useState("");
-  const inputRef = useRef(null);
-
-  useHotkeys("ctrl+k", e => {
-    e.preventDefault();
-    inputRef.current.focus();
-  });
-
   // async function greet() {
   //   setGreetMsg(await invoke("greet", { name }));
   // }
 
-  async function search() {
-    setTerm(await invoke("search", { term }));
-  }
+  const [view, setView] = useState("list");
 
   return (
-    <div className='flex flex-col justify-center items-center space-y-2'>
-      <form
-        className='my-2 flex items-center gap-2'
-        onSubmit={e => {
-          e.preventDefault();
-          search(e.target.value);
-        }}
-      >
-        {/* TODO - add focus on Ctrl+K */}
-        <label className='input input-bordered flex items-center gap-2'>
-          <input
-            ref={inputRef}
-            type='text'
-            className='grow'
-            placeholder='Search'
-          />
-          <kbd className='kbd kbd-sm'>⌘</kbd>
-          <kbd className='kbd kbd-sm'>K</kbd>
-        </label>
-        <button type='submit' className='btn btn-primary'>
-          Search
-        </button>
-      </form>
-      <GridView items={items} />
+    <div
+      className='bg-base-300 flex flex-col justify-center items-center space-y-2'
+      // data-theme='business'
+      // data-theme='synthwave'
+    >
+      <div className='navbar bg-base-100'>
+        <SearchBox />
+        <ul className='menu menu-horizontal bg-base-200 rounded-box'>
+          <li>
+            <button
+              className={view === "list" ? "active" : ""}
+              onClick={() => setView("list")}
+            >
+              <QueueListIcon className='size-6' />
+            </button>
+          </li>
+          <li>
+            <button
+              className={view === "grid" ? "active" : ""}
+              onClick={() => setView("grid")}
+            >
+              <TableCellsIcon className='size-6' />
+            </button>
+          </li>
+        </ul>
+      </div>
+      {view === "list" && <ListView items={items} />}
+      {view === "grid" && <GridView items={items} />}
     </div>
   );
 }
