@@ -2,14 +2,13 @@
 #![allow(dead_code)]
 
 use rusqlite::Connection;
-use std::cell::RefCell;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::{fs, path::Path};
 
 use crate::meme::Meme;
 
 pub struct Database {
-    conn: RefCell<Option<Arc<Connection>>>,
+    conn: Arc<Mutex<Connection>>,
 }
 
 impl Database {
@@ -33,8 +32,8 @@ impl Database {
 			AFTER INSERT ON memes
 			FOR EACH ROW
 			BEGIN
-				INSERT INTO memes_fts (name, description, tags)
-				VALUES (NEW.name, NEW.description, NEW.tags);
+				INSERT INTO memes_fts (id, name, description, tags)
+				VALUES (NEW.id, NEW.name, NEW.description, NEW.tags);
 			END;",
             [],
         )?;
@@ -46,8 +45,8 @@ impl Database {
 			FOR EACH ROW
 			BEGIN
 				DELETE FROM memes_fts WHERE id = OLD.id;
-				INSERT INTO memes_fts (name, description, tags)
-				VALUES (NEW.name, NEW.description, NEW.tags);
+				INSERT INTO memes_fts (id, name, description, tags)
+				VALUES (NEW.id, NEW.name, NEW.description, NEW.tags);
 			END;",
             [],
         )?;
@@ -84,6 +83,7 @@ impl Database {
     fn create_fts_table(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         conn.execute(
             "CREATE VIRTUAL TABLE if NOT EXISTS memes_fts USING fts5(
+							id,
 							name,
 							description,
 							tags
@@ -100,9 +100,9 @@ impl Database {
         let conn = Connection::open(db_path).unwrap();
 
         // Create triggers and tables on database connection
-        Self::create_triggers(&conn).unwrap();
         Self::create_memes_table(&conn).unwrap();
         Self::create_fts_table(&conn).unwrap();
+        Self::create_triggers(&conn).unwrap();
 
         Self::new(conn)
     }
@@ -110,13 +110,13 @@ impl Database {
     // updating the current instace
     pub fn new(conn: Connection) -> Self {
         Self {
-            conn: RefCell::new(Some(Arc::new(conn))),
+            conn: Arc::new(Mutex::new(conn)),
         }
     }
 
     // public methods
     pub fn insert_meme(&self, meme: &Meme) -> Result<(), Box<dyn std::error::Error>> {
-        let conn = self.conn.borrow().as_ref().unwrap().clone();
+        let conn = self.conn.lock().unwrap();
         let mut statement =
             conn.prepare("INSERT INTO memes (name, url, description, tags) VALUES (?, ?, ?, ?)")?;
         let tags: String = meme.tags.join(",");
@@ -133,17 +133,20 @@ impl Database {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
 
-        let conn = self.conn.borrow().as_ref().unwrap().clone();
-        // REVIEW - the SQL join is not correct?
-        let mut stmt = conn.prepare(
-            "
-        SELECT m.id, m.name, m.url, m.description, tags.text AS tags
+        // TODO - add validation for query
+
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn
+            .prepare(
+                "
+        SELECT m.id, m.name, m.url, m.description, m.tags
         FROM memes AS m
-        INNER JOIN memes_fts AS fts ON m.rowid = fts.rowid  -- Join based on rowid
+        INNER JOIN memes_fts AS fts ON m.id = fts.id
         WHERE fts.name MATCH ? OR fts.description MATCH ? OR fts.tags MATCH ?
 				LIMIT ? OFFSET ?
         ",
-        )?;
+            )
+            .expect("Failed to prepare statement");
 
         let rows = stmt
             .query_map(
@@ -168,7 +171,7 @@ impl Database {
                     })
                 },
             )
-            .unwrap();
+            .expect("Failed to query");
 
         let mut memes = Vec::new();
         for row in rows {
@@ -186,7 +189,7 @@ impl Database {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
 
-        let conn = self.conn.borrow().as_ref().unwrap().clone();
+        let conn = self.conn.lock().unwrap();
 
         let mut stmt = conn.prepare(
             "SELECT id, name, url, description, tags.text AS tags 
@@ -215,21 +218,21 @@ impl Database {
     }
 
     pub fn delete_meme(&self, id: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let conn = self.conn.borrow().as_ref().unwrap().clone();
+        let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare("DELETE FROM memes WHERE id = ?")?;
         statement.execute(&[id])?;
         Ok(())
     }
 
     pub fn update_meme(&self, meme: &Meme) -> Result<(), Box<dyn std::error::Error>> {
-        let conn = self.conn.borrow().as_ref().unwrap().clone();
+        let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare("UPDATE memes SET url = ? WHERE name = ?")?;
         statement.execute([meme.id.unwrap()])?;
         Ok(())
     }
 
     pub fn clear_memes(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let conn = self.conn.borrow().as_ref().unwrap().clone();
+        let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare("DELETE FROM memes")?;
         statement.execute([])?;
         Ok(())
@@ -243,12 +246,8 @@ impl Database {
     //     Ok(())
     // }
 
-    pub fn is_open(&self) -> bool {
-        self.conn.borrow().is_some()
-    }
-
     // pub fn is_empty(&self) -> Result<bool, Box<dyn std::error::Error>> {
-    //     let conn = self.conn.borrow().as_ref().unwrap().clone();
+    //     let conn = self.conn.get_mut().unwrap()
 
     //     let mut statement = conn.prepare("SELECT COUNT(*) FROM memes")?;
     //     let rows = statement.query_map([], |row| Ok(row.get_ref(0)?))?;
@@ -257,7 +256,7 @@ impl Database {
     // }
 
     // pub fn count_memes(&self) -> Result<usize, Box<dyn std::error::Error>> {
-    //     let conn = self.conn.borrow().as_ref().unwrap().clone();
+    //     let conn = self.conn.get_mut().unwrap()
     //     let mut statement = conn.prepare("SELECT COUNT(*) FROM memes")?;
     //     let rows = statement.query_map([], |row| Ok(row.get_ref(0)?))?;
     //     let count: i64 = rows.fold(0, |acc, row| acc + row.unwrap().as_i64().unwrap());

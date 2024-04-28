@@ -1,4 +1,3 @@
-// REVIEW - is derived trait needed here?
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct Meme {
     pub id: Option<i64>,

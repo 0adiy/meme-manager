@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { useHotkeys } from "react-hotkeys-hook";
 
 function SearchBox() {
-  const [term, setTerm] = useState("");
   const inputRef = useRef(null);
 
   useHotkeys("ctrl+k", e => {
@@ -12,7 +11,11 @@ function SearchBox() {
   });
 
   async function search() {
-    setTerm(await invoke("greet", { term }));
+    const query = inputRef.current.value;
+    if (query === "") return;
+
+    const memes = await invoke("search", { query });
+    console.log(memes[0]);
   }
 
   return (
