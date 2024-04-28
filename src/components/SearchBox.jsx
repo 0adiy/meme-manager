@@ -12,7 +12,7 @@ function SearchBox() {
   });
 
   async function search() {
-    setTerm(await invoke("search", { term }));
+    setTerm(await invoke("greet", { term }));
   }
 
   return (
