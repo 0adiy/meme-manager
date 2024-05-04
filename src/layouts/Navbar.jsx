@@ -5,7 +5,7 @@ import MemeForm from "../components/MemeForm.jsx";
 
 export default function Navbar({ view, setView }) {
   return (
-    <div className='navbar bg-base-100 sticky top-0 z-10'>
+    <div className='navbar bg-neutral sticky top-0 z-10'>
       <About />
       <SearchBox />
       <MemeForm />

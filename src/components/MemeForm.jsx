@@ -1,5 +1,6 @@
 import { useMemesStore } from "../store/useMemesStore";
 import { useMemeFormStore } from "../store/useMemeFormStore";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 export default function MemeForm() {
   const { insertMeme } = useMemesStore();
@@ -24,15 +25,20 @@ export default function MemeForm() {
       description: description,
       tags: tags,
     });
+    reset();
+    // close modal
+    document.getElementById("add_meme_modal").close();
   };
   return (
     <>
-      <button
-        className='btn btn-primary'
-        onClick={() => document.getElementById("add_meme_modal").showModal()}
-      >
-        Add Meme
-      </button>
+      <div className='tooltip-bottom tooltip' data-tip='Add Meme'>
+        <button
+          className='btn btn-primary mx-4'
+          onClick={() => document.getElementById("add_meme_modal").showModal()}
+        >
+          <PlusIcon className='size-5' />
+        </button>
+      </div>
       <dialog id='add_meme_modal' className='modal'>
         <div className='modal-box'>
           <h3 className='font-bold text-lg mb-4'>Meme Form</h3>
@@ -53,7 +59,7 @@ export default function MemeForm() {
               placeholder='Url'
               onChange={e => setUrl(e.target.value)}
               value={url}
-              className='input input-bordered w-full  text-base'
+              className='input input-bordered w-full text-base'
             />
             <textarea
               className='textarea textarea-bordered textarea-xs w-full text-base px-3'
@@ -61,6 +67,7 @@ export default function MemeForm() {
               onChange={e => setDescription(e.target.value)}
               value={description}
               id='description'
+              rows='3'
             />
             <textarea
               className='textarea textarea-bordered textarea-xs w-full text-base px-3'
@@ -68,6 +75,7 @@ export default function MemeForm() {
               onChange={e => setTags(e.target.value)}
               value={tags}
               id='tags'
+              rows='2'
             />
 
             <div className='modal-action flex'>

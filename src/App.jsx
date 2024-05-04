@@ -2,7 +2,6 @@ import GridView from "./layouts/GridView.jsx";
 import ListView from "./layouts/ListView.jsx";
 import { useEffect, useState } from "react";
 import { useMemesStore } from "./store/useMemesStore.js";
-import MemeForm from "./components/MemeForm.jsx";
 import Navbar from "./layouts/Navbar.jsx";
 
 const items = [
@@ -92,7 +91,7 @@ function App() {
 
   return (
     <div
-      className='w-screen h-screen bg-base-300 flex flex-col justify-start items-center space-y-2'
+      className='w-full min-h-screen bg-base-300 flex flex-col justify-start items-center space-y-2'
       // data-theme='business'
       // data-theme='synthwave'
     >

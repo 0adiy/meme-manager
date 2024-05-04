@@ -9,7 +9,7 @@ const setup = (set, get) => ({
   description: "",
   setDescription: description => set({ description }),
   tags: [],
-  setTags: t => set({ tags: t.split(",") }),
+  setTags: t => set({ tags: t.split(",").map(t => t.trim()) }),
   reset: () => set({ name: "", url: "", description: "", tags: [] }),
 });
 

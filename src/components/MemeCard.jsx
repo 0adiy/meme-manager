@@ -1,3 +1,9 @@
+import {
+  ClipboardDocumentListIcon,
+  TrashIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline";
+
 /* 
     pub id: Option<i64>,
     pub name: String,
@@ -37,7 +43,7 @@ function Media({ meme }) {
 export default function MemeCard({ meme, list = false }) {
   return (
     <div
-      className={`card bg-base-200 shadow-xl min-h-10 ${
+      className={`card bg-base-100 shadow-xl min-h-10 ${
         list ? "card-side" : "card-compact"
       }`}
     >
@@ -53,8 +59,22 @@ export default function MemeCard({ meme, list = false }) {
       <div className='card-body'>
         <h2 className='card-title line-clamp-1'>{meme?.name}</h2>
         <p className='line-clamp-3'>{meme?.description}</p>
-        <div className='card-actions justify-end'>
-          <button className='btn btn-secondary'>Copy</button>
+        <div className='card-actions justify-end mt-2'>
+          <div className='tooltip' data-tip='Copy'>
+            <button className='btn btn-info'>
+              <ClipboardDocumentListIcon className='size-5' />
+            </button>
+          </div>
+          <div className='tooltip' data-tip='Update'>
+            <button className='btn btn-accent'>
+              <PencilIcon className='size-5' />
+            </button>
+          </div>
+          <div className='tooltip' data-tip='Remove'>
+            <button className='btn btn-error'>
+              <TrashIcon className='size-5' />
+            </button>
+          </div>
         </div>
       </div>
     </div>

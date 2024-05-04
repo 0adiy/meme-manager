@@ -11,14 +11,21 @@ pub fn search(query: &str, db: tauri::State<Database>) -> Vec<Meme> {
 #[tauri::command]
 pub fn get_memes(db: tauri::State<Database>) -> Result<Vec<Meme>, String> {
     let memes = db.get_memes(None, None).unwrap();
+    // printing
+    for row in &memes {
+        println!("{:?}", row.name);
+    }
     Ok(memes)
 }
 
 #[tauri::command]
-pub fn insert_meme(meme: Meme, db: tauri::State<Database>) -> Result<(), String> {
+pub fn insert_meme(mut meme: Meme, db: tauri::State<Database>) -> Result<(), String> {
     // validation
+    for tag in &mut meme.tags {
+        *tag = tag.trim().to_string();
+    }
     db.insert_meme(&meme).unwrap();
-    println!("inserted meme {:?}", meme);
+    println!("inserted meme {:?}", meme.name);
     Ok(())
 }
 

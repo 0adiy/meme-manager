@@ -171,10 +171,6 @@ impl Database {
                 },
             )?
             .collect::<Result<Vec<Meme>, _>>()?;
-
-        for row in &rows {
-            println!("{:?}", row.name);
-        }
         Ok(rows)
     }
 
@@ -211,8 +207,6 @@ impl Database {
                 })
             })?
             .collect::<Result<Vec<Meme>, _>>()?;
-
-        println!("rows: {:?}", rows);
         Ok(rows)
     }
 
