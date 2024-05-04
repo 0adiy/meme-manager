@@ -1,8 +1,9 @@
 import GridView from "./layouts/GridView.jsx";
-import SearchBox from "./components/SearchBox.jsx";
 import ListView from "./layouts/ListView.jsx";
-import { TableCellsIcon, QueueListIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMemesStore } from "./store/useMemesStore.js";
+import MemeForm from "./components/MemeForm.jsx";
+import Navbar from "./layouts/Navbar.jsx";
 
 const items = [
   {
@@ -83,36 +84,21 @@ function App() {
   // }
 
   const [view, setView] = useState("list");
+  const { getMemes, memes, setMemes } = useMemesStore();
+
+  useEffect(() => {
+    getMemes().then(setMemes);
+  }, []);
 
   return (
     <div
-      className='bg-base-300 flex flex-col justify-center items-center space-y-2'
+      className='w-screen h-screen bg-base-300 flex flex-col justify-start items-center space-y-2'
       // data-theme='business'
       // data-theme='synthwave'
     >
-      <div className='navbar bg-base-100'>
-        <SearchBox />
-        <ul className='menu menu-horizontal bg-base-200 rounded-box'>
-          <li>
-            <button
-              className={view === "list" ? "active" : ""}
-              onClick={() => setView("list")}
-            >
-              <QueueListIcon className='size-6' />
-            </button>
-          </li>
-          <li>
-            <button
-              className={view === "grid" ? "active" : ""}
-              onClick={() => setView("grid")}
-            >
-              <TableCellsIcon className='size-6' />
-            </button>
-          </li>
-        </ul>
-      </div>
-      {view === "list" && <ListView items={items} />}
-      {view === "grid" && <GridView items={items} />}
+      <Navbar setView={setView} view={view} />
+      {view === "list" && <ListView items={memes} />}
+      {view === "grid" && <GridView items={memes} />}
     </div>
   );
 }

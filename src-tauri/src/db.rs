@@ -142,7 +142,8 @@ impl Database {
         SELECT m.id, m.name, m.url, m.description, m.tags
         FROM memes AS m
         INNER JOIN memes_fts AS fts ON m.id = fts.id
-        WHERE fts.name MATCH ? OR fts.description MATCH ? OR fts.tags MATCH ?
+        WHERE memes_fts MATCH ?
+				ORDER BY fts.rank 
 				LIMIT ? OFFSET ?
         ",
             )
@@ -151,8 +152,6 @@ impl Database {
         let rows = stmt
             .query_map(
                 &[
-                    &query,
-                    &query,
                     &query,
                     &limit.to_string().as_str(),
                     &offset.to_string().as_str(),
@@ -170,15 +169,13 @@ impl Database {
                             .collect(),
                     })
                 },
-            )
-            .expect("Failed to query");
+            )?
+            .collect::<Result<Vec<Meme>, _>>()?;
 
-        let mut memes = Vec::new();
-        for row in rows {
-            memes.push(row?);
+        for row in &rows {
+            println!("{:?}", row.name);
         }
-
-        Ok(memes)
+        Ok(rows)
     }
 
     pub fn get_memes(
@@ -192,7 +189,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
 
         let mut stmt = conn.prepare(
-            "SELECT id, name, url, description, tags.text AS tags 
+            "SELECT id, name, url, description, tags 
 					FROM memes
 					ORDER BY id DESC
 					LIMIT ? OFFSET ?
@@ -214,6 +211,8 @@ impl Database {
                 })
             })?
             .collect::<Result<Vec<Meme>, _>>()?;
+
+        println!("rows: {:?}", rows);
         Ok(rows)
     }
 

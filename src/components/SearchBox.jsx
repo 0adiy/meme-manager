@@ -1,22 +1,16 @@
 import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useMemesStore } from "../store/useMemesStore";
 
 function SearchBox() {
   const inputRef = useRef(null);
+  const { searchMemes, setMemes } = useMemesStore();
 
   useHotkeys("ctrl+k", e => {
     e.preventDefault();
     inputRef.current.focus();
   });
-
-  async function search() {
-    const query = inputRef.current.value;
-    if (query === "") return;
-
-    const memes = await invoke("search", { query });
-    console.log(memes[0]);
-  }
 
   return (
     <form
@@ -36,7 +30,14 @@ function SearchBox() {
         <kbd className='kbd kbd-sm'>⌘</kbd>
         <kbd className='kbd kbd-sm'>K</kbd>
       </label>
-      <button type='submit' className='btn btn-primary'>
+      <button
+        type='submit'
+        className='btn btn-primary'
+        onClick={e => {
+          e.preventDefault();
+          searchMemes(inputRef.current.value).then(setMemes);
+        }}
+      >
         Search
       </button>
     </form>
