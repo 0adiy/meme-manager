@@ -1,6 +1,7 @@
 import { useMemesStore } from "../store/useMemesStore";
 import { useMemeFormStore } from "../store/useMemeFormStore";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { open } from "@tauri-apps/api/dialog";
 
 export default function MemeForm() {
   const { insertMeme } = useMemesStore();
@@ -9,10 +10,12 @@ export default function MemeForm() {
     url,
     description,
     tags,
+    localPath,
     setName,
     setUrl,
     setDescription,
     setTags,
+    setLocalPath,
     reset,
   } = useMemeFormStore();
 
@@ -29,6 +32,44 @@ export default function MemeForm() {
     // close modal
     document.getElementById("add_meme_modal").close();
   };
+
+  const handelFileOpen = async e => {
+    const filePath = await open({
+      multiple: false,
+      filters: [
+        {
+          name: "Images",
+          extensions: [
+            "jpg",
+            "png",
+            "jpeg",
+            "gif",
+            "webp",
+            "heic",
+            "tiff",
+            "bmp",
+          ],
+        },
+        {
+          name: "Video",
+          extensions: [
+            "mp4",
+            "webm",
+            "mov",
+            "avi",
+            "mkv",
+            "flv",
+            "ogv",
+            "wmv",
+            "mpg",
+            "mpeg",
+          ],
+        },
+      ],
+    });
+    setLocalPath(filePath);
+  };
+
   return (
     <>
       <div className='tooltip-bottom tooltip' data-tip='Add Meme'>
@@ -52,7 +93,6 @@ export default function MemeForm() {
               value={name}
               className='input input-bordered w-full text-base'
             />
-
             <input
               type='text'
               id='url'
@@ -61,6 +101,16 @@ export default function MemeForm() {
               value={url}
               className='input input-bordered w-full text-base'
             />
+            <input
+              type='button'
+              className='btn btn-neutral w-full'
+              onClick={handelFileOpen}
+              value={"Select File"}
+            />
+            <p className='mb-4 bold'>
+              Local Path: <span className='text-accent'>{localPath}</span>
+            </p>
+
             <textarea
               className='textarea textarea-bordered textarea-xs w-full text-base px-3'
               placeholder='Description'
@@ -77,7 +127,6 @@ export default function MemeForm() {
               id='tags'
               rows='2'
             />
-
             <div className='modal-action flex'>
               <button className='btn btn-primary' onClick={handleOnSubmit}>
                 Submit

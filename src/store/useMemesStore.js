@@ -17,7 +17,10 @@ export const useMemesStore = create(set => ({
     if (id < 1) return;
     return await invoke("delete_meme", { id });
   },
-  updateMeme: async meme => {
+  updateMeme: async newMeme => {
+    const oldMeme = await invoke("get_meme", { id: `${newMeme.id}` });
+    const meme = { ...oldMeme, ...newMeme };
+    meme.id = `${meme.id}`;
     return await invoke("update_meme", { meme });
   },
   searchMemes: async query => {

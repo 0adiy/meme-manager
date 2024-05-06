@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* REVIEW - should be fixed in later versions 
+	see https://github.com/saadeghi/daisyui/issues/2990
+*/
+@layer base {
+  :root:has(
+      :is(
+          .modal-open,
+          .modal:target,
+          .modal-toggle:checked + .modal,
+          .modal[open]
+        )
+    ) {
+    scrollbar-gutter: revert !important;
+  }
+}
+
 :root {
   font-synthesis: none;
   text-rendering: optimizeLegibility;

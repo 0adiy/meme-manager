@@ -7,7 +7,7 @@ mod meme;
 
 use std::vec;
 
-use api::{clear_memes, delete_meme, get_memes, insert_meme, search, update_meme};
+use api::{clear_memes, delete_meme, get_meme, get_memes, insert_meme, search, update_meme};
 use db::Database;
 use tauri::Manager;
 
@@ -35,6 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .invoke_handler(tauri::generate_handler![
             clear_memes,
             delete_meme,
+            get_meme,
             get_memes,
             insert_meme,
             search,

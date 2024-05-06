@@ -9,7 +9,9 @@ const setup = (set, get) => ({
   description: "",
   setDescription: description => set({ description }),
   tags: [],
-  setTags: t => set({ tags: t.split(",").map(t => t.trim()) }),
+  setTags: t => set({ tags: t.split(",") }),
+  localPath: "",
+  setLocalPath: localPath => set({ localPath }),
   reset: () => set({ name: "", url: "", description: "", tags: [] }),
 });
 

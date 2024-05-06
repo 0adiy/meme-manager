@@ -4,8 +4,18 @@ use crate::meme::Meme;
 #[tauri::command]
 pub fn search(query: &str, db: tauri::State<Database>) -> Vec<Meme> {
     // println!("{}\n\n\n\n", query);
+    let query = query.trim();
+    if query.is_empty() {
+        return db.get_memes(None, None).unwrap();
+    }
     db.search_memes(query, None, None)
         .expect("Failed to search")
+}
+
+#[tauri::command]
+pub fn get_meme(id: &str, db: tauri::State<Database>) -> Result<Meme, String> {
+    db.get_meme(id)
+        .map_err(|_| "Failed to get meme".to_string())
 }
 
 #[tauri::command]

@@ -1,9 +1,9 @@
 // REVIEW - remove in production
 #![allow(dead_code)]
 
-use rusqlite::Connection;
+use rusqlite::{named_params, Connection};
 use std::sync::{Arc, Mutex};
-use std::{fs, path::Path};
+use std::{error::Error, fs, path::Path};
 
 use crate::meme::Meme;
 
@@ -25,7 +25,7 @@ impl Database {
     }
 
     // Function to create triggers (consider placing it in a separate module)
-    fn create_triggers(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    fn create_triggers(conn: &Connection) -> Result<(), Box<dyn Error>> {
         // Trigger for INSERT (already explained in previous response)
         conn.execute(
             "CREATE TRIGGER IF NOT EXISTS after_insert_meme
@@ -65,22 +65,23 @@ impl Database {
         Ok(())
     }
 
-    fn create_memes_table(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    fn create_memes_table(conn: &Connection) -> Result<(), Box<dyn Error>> {
         conn.execute(
-            "CREATE TABLE if NOT EXISTS memes(
+            "CREATE TABLE if NOT EXISTS memes (
 							id INTEGER PRIMARY KEY AUTOINCREMENT,
-							name TEXT NOT NULL,
-							url TEXT NOT NULL,
+							name        TEXT NOT NULL,
+							url         TEXT,
+							local_path  TEXT,
 							description TEXT,
-							tags TEXT
+							tags        TEXT
 					)",
-            [],
+            (),
         )?;
 
         Ok(())
     }
 
-    fn create_fts_table(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    fn create_fts_table(conn: &Connection) -> Result<(), Box<dyn Error>> {
         conn.execute(
             "CREATE VIRTUAL TABLE if NOT EXISTS memes_fts USING fts5(
 							id,
@@ -115,12 +116,31 @@ impl Database {
     }
 
     // public methods
-    pub fn insert_meme(&self, meme: &Meme) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn insert_meme(&self, meme: &Meme) -> Result<(), Box<dyn Error>> {
         let conn = self.conn.lock().unwrap();
-        let mut statement =
-            conn.prepare("INSERT INTO memes (name, url, description, tags) VALUES (?, ?, ?, ?)")?;
         let tags: String = meme.tags.join(",");
-        statement.execute(&[&meme.name, &meme.url, &meme.description, &tags])?;
+        // let mut statement = conn.prepare(
+        //     "INSERT INTO memes (name, url, local_path, description, tags) VALUES (?, ?, ?, ?, ?)",
+        // )?;
+        // statement.execute(&[
+        //     &meme.name,
+        //     &meme.url,
+        //     &meme.local_path.as_ref().unwrap_or(&"".to_string()),
+        //     &meme.description,
+        //     &tags,
+        // ])?;
+
+        conn.execute(
+            "INSERT INTO memes (name, url, local_path, description, tags) VALUES (:name, :url, :local_path, :description, :tags)",
+            named_params! {
+                    ":name": meme.name,
+                    ":url": meme.url,
+                    ":local_path": meme.local_path,
+                    ":description": meme.description,
+                    ":tags": tags
+            },
+        )?;
+
         Ok(())
     }
 
@@ -129,7 +149,7 @@ impl Database {
         query: &str,
         limit: Option<i64>,
         offset: Option<i64>,
-    ) -> Result<Vec<Meme>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<Meme>, Box<dyn Error>> {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
 
@@ -139,7 +159,7 @@ impl Database {
         let mut stmt = conn
             .prepare(
                 "
-        SELECT m.id, m.name, m.url, m.description, m.tags
+        SELECT m.id, m.name, m.url, m.local_path, m.description, m.tags
         FROM memes AS m
         INNER JOIN memes_fts AS fts ON m.id = fts.id
         WHERE memes_fts MATCH ?
@@ -161,9 +181,10 @@ impl Database {
                         id: row.get(0)?,
                         name: row.get(1)?,
                         url: row.get(2)?,
-                        description: row.get(3)?,
+                        local_path: row.get(3)?,
+                        description: row.get(4)?,
                         tags: row
-                            .get::<usize, String>(4)?
+                            .get::<usize, String>(5)?
                             .split(',')
                             .map(|s| s.to_string())
                             .collect(),
@@ -178,14 +199,14 @@ impl Database {
         &self,
         limit: Option<i64>,
         offset: Option<i64>,
-    ) -> Result<Vec<Meme>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<Meme>, Box<dyn Error>> {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
 
         let conn = self.conn.lock().unwrap();
 
         let mut stmt = conn.prepare(
-            "SELECT id, name, url, description, tags 
+            "SELECT id, name, url, local_path, description, tags 
 					FROM memes
 					ORDER BY id DESC
 					LIMIT ? OFFSET ?
@@ -198,9 +219,10 @@ impl Database {
                     id: row.get(0)?,
                     name: row.get(1)?,
                     url: row.get(2)?,
-                    description: row.get(3)?,
+                    local_path: row.get(3)?,
+                    description: row.get(4)?,
                     tags: row
-                        .get::<usize, String>(4)?
+                        .get::<usize, String>(5)?
                         .split(',')
                         .map(|s| s.to_string())
                         .collect(),
@@ -210,28 +232,53 @@ impl Database {
         Ok(rows)
     }
 
-    pub fn delete_meme(&self, id: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn get_meme(&self, id: &str) -> Result<Meme, Box<dyn Error>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT id, name, url, local_path, description, tags FROM memes WHERE id = ?",
+        )?;
+        let row = stmt.query_row(&[id], |row| {
+            Ok(Meme {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                url: row.get(2)?,
+                local_path: row.get(3)?,
+                description: row.get(4)?,
+                tags: row
+                    .get::<usize, String>(5)?
+                    .split(',')
+                    .map(|s| s.to_string())
+                    .collect(),
+            })
+        })?;
+        Ok(row)
+    }
+
+    pub fn delete_meme(&self, id: &str) -> Result<(), Box<dyn Error>> {
         let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare("DELETE FROM memes WHERE id = ?")?;
         statement.execute(&[id])?;
         Ok(())
     }
 
-    pub fn update_meme(&self, meme: &Meme) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn update_meme(&self, meme: &Meme) -> Result<(), Box<dyn Error>> {
         let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare("UPDATE memes SET url = ? WHERE name = ?")?;
-        statement.execute([meme.id.unwrap()])?;
+        statement
+            .execute([meme.id.unwrap()])
+            .expect("Failed to update meme");
+        // TODO - SQL needs adjustments
         Ok(())
     }
 
-    pub fn clear_memes(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn clear_memes(&self) -> Result<(), Box<dyn Error>> {
         let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare("DELETE FROM memes")?;
         statement.execute([])?;
         Ok(())
     }
 
-    // pub fn close(&self) -> Result<(), Box<dyn std::error::Error>> {
+    // pub fn close(&self) -> Result<(), Box<dyn Error>> {
     //     let conn = self.conn.borrow().take();
     //     if let Some(conn) = conn {
     //         conn.close();
@@ -239,7 +286,7 @@ impl Database {
     //     Ok(())
     // }
 
-    // pub fn is_empty(&self) -> Result<bool, Box<dyn std::error::Error>> {
+    // pub fn is_empty(&self) -> Result<bool, Box<dyn Error>> {
     //     let conn = self.conn.get_mut().unwrap()
 
     //     let mut statement = conn.prepare("SELECT COUNT(*) FROM memes")?;
@@ -248,7 +295,7 @@ impl Database {
     //     Ok(count == 0)
     // }
 
-    // pub fn count_memes(&self) -> Result<usize, Box<dyn std::error::Error>> {
+    // pub fn count_memes(&self) -> Result<usize, Box<dyn Error>> {
     //     let conn = self.conn.get_mut().unwrap()
     //     let mut statement = conn.prepare("SELECT COUNT(*) FROM memes")?;
     //     let rows = statement.query_map([], |row| Ok(row.get_ref(0)?))?;

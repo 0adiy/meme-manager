@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
+import { useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useMemesStore } from "../store/useMemesStore";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";

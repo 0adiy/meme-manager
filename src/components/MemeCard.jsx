@@ -4,6 +4,7 @@ import {
   PencilIcon,
 } from "@heroicons/react/24/outline";
 
+// TODO - display tags and fix 2 lines
 /* 
     pub id: Option<i64>,
     pub name: String,
