@@ -73,7 +73,8 @@ impl Database {
 							url         TEXT,
 							local_path  TEXT,
 							description TEXT,
-							tags        TEXT
+							tags        TEXT,
+							filetype    TEXT
 					)",
             (),
         )?;
@@ -87,7 +88,8 @@ impl Database {
 							id,
 							name,
 							description,
-							tags
+							tags,
+							filetype
 					)",
             [],
         )?;
@@ -131,13 +133,14 @@ impl Database {
         // ])?;
 
         conn.execute(
-            "INSERT INTO memes (name, url, local_path, description, tags) VALUES (:name, :url, :local_path, :description, :tags)",
+            "INSERT INTO memes (name, url, local_path, description, tags, filetype) VALUES (:name, :url, :local_path, :description, :tags, :filetype)",
             named_params! {
                     ":name": meme.name,
                     ":url": meme.url,
                     ":local_path": meme.local_path,
                     ":description": meme.description,
-                    ":tags": tags
+                    ":tags": tags,
+										":filetype": meme.filetype
             },
         )?;
 
@@ -156,18 +159,16 @@ impl Database {
         // TODO - add validation for query
 
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn
-            .prepare(
-                "
-        SELECT m.id, m.name, m.url, m.local_path, m.description, m.tags
+        let mut stmt = conn.prepare(
+            "
+        SELECT m.id, m.name, m.url, m.local_path, m.description, m.tags, m.filetype
         FROM memes AS m
         INNER JOIN memes_fts AS fts ON m.id = fts.id
         WHERE memes_fts MATCH ?
 				ORDER BY fts.rank 
 				LIMIT ? OFFSET ?
         ",
-            )
-            .expect("Failed to prepare statement");
+        )?;
 
         let rows = stmt
             .query_map(
@@ -188,6 +189,7 @@ impl Database {
                             .split(',')
                             .map(|s| s.to_string())
                             .collect(),
+                        filetype: row.get(6)?,
                     })
                 },
             )?
@@ -206,7 +208,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
 
         let mut stmt = conn.prepare(
-            "SELECT id, name, url, local_path, description, tags 
+            "SELECT id, name, url, local_path, description, tags, filetype
 					FROM memes
 					ORDER BY id DESC
 					LIMIT ? OFFSET ?
@@ -226,6 +228,7 @@ impl Database {
                         .split(',')
                         .map(|s| s.to_string())
                         .collect(),
+                    filetype: row.get(6)?,
                 })
             })?
             .collect::<Result<Vec<Meme>, _>>()?;
@@ -235,7 +238,8 @@ impl Database {
     pub fn get_meme(&self, id: &str) -> Result<Meme, Box<dyn Error>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, name, url, local_path, description, tags FROM memes WHERE id = ?",
+            "SELECT id, name, url, local_path, description, tags, filetype
+						FROM memes WHERE id = ?",
         )?;
         let row = stmt.query_row(&[id], |row| {
             Ok(Meme {
@@ -249,6 +253,7 @@ impl Database {
                     .split(',')
                     .map(|s| s.to_string())
                     .collect(),
+                filetype: row.get(6)?,
             })
         })?;
         Ok(row)

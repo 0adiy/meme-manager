@@ -12,6 +12,8 @@ const setup = (set, get) => ({
   setTags: t => set({ tags: t.split(",") }),
   localPath: "",
   setLocalPath: localPath => set({ localPath }),
+  filetype: "image",
+  setFiletype: filetype => set({ filetype }),
   reset: () => set({ name: "", url: "", description: "", tags: [] }),
 });
 

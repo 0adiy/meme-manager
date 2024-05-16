@@ -5,7 +5,7 @@
 /* REVIEW - should be fixed in later versions 
 	see https://github.com/saadeghi/daisyui/issues/2990
 */
-@layer base {
+/* @layer base {
   :root:has(
       :is(
           .modal-open,
@@ -16,6 +16,9 @@
     ) {
     scrollbar-gutter: revert !important;
   }
+} */
+html {
+  overflow-y: scroll;
 }
 
 :root {

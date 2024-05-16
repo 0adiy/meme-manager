@@ -11,23 +11,28 @@ export default function MemeForm() {
     description,
     tags,
     localPath,
+    filetype,
     setName,
     setUrl,
     setDescription,
     setTags,
     setLocalPath,
+    setFiletype,
     reset,
   } = useMemeFormStore();
 
   const handleOnSubmit = e => {
     e.preventDefault();
-    console.log(e.target);
-    insertMeme({
+    const meme = {
       name: name,
       url: url,
       description: description,
       tags: tags,
-    });
+      local_path: localPath,
+      filetype: "image", // TODO - add input
+    };
+    console.log(meme);
+    insertMeme(meme);
     reset();
     // close modal
     document.getElementById("add_meme_modal").close();
@@ -110,6 +115,21 @@ export default function MemeForm() {
             <p className='mb-4 bold'>
               Local Path: <span className='text-accent'>{localPath}</span>
             </p>
+
+            <label className='label cursor-pointer m-auto w-fit gap-4'>
+              <span className='label-text'>Image</span>
+              <input
+                type='checkbox'
+                className='toggle'
+                onChange={e =>
+                  filetype === "image"
+                    ? setFiletype("video")
+                    : setFiletype("image")
+                }
+                checked={filetype === "video"}
+              />
+              <span className='label-text'>Video</span>
+            </label>
 
             <textarea
               className='textarea textarea-bordered textarea-xs w-full text-base px-3'

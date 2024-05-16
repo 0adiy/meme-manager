@@ -27,6 +27,7 @@ const About = () => {
                 className='btn theme-controller join-item'
                 aria-label='Dark'
                 value='dark'
+                // TODO - handle checked
               />
               <input
                 type='radio'

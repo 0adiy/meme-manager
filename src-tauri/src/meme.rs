@@ -6,6 +6,7 @@ pub struct Meme {
     pub description: Option<String>,
     pub tags: Vec<String>,
     pub local_path: Option<String>,
+    pub filetype: String, // should be Boolean?
 }
 // TODO - have 2 different structs for read and write
 impl Meme {
@@ -15,6 +16,7 @@ impl Meme {
         description: String,
         tags: Vec<String>,
         local_path: String,
+        filetype: String,
     ) -> Self {
         Self {
             id: None,
@@ -23,6 +25,7 @@ impl Meme {
             description: Some(description),
             tags,
             local_path: Some(local_path),
+            filetype,
         }
     }
 }

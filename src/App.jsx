@@ -83,10 +83,10 @@ function App() {
   // }
 
   const [view, setView] = useState("list");
-  const { getMemes, memes, setMemes } = useMemesStore();
+  const { getMemes, memes } = useMemesStore();
 
   useEffect(() => {
-    getMemes().then(setMemes);
+    getMemes();
   }, []);
 
   return (
