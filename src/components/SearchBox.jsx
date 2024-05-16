@@ -22,6 +22,19 @@ function SearchBox() {
 
   return (
     <form className='flex items-center gap-2 flex-1 justify-center'>
+      <button
+        className='btn btn-neutral btn-outline'
+        onClick={e => {
+          e.preventDefault();
+          if (query) {
+            setQuery("");
+            searchMemes("");
+          }
+        }}
+        disabled={!query}
+      >
+        Home
+      </button>
       <label className='input input-bordered flex items-center gap-2  bg-base-300'>
         <input
           ref={inputRef}

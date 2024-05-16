@@ -46,14 +46,17 @@ function Media({ meme }) {
 }
 
 function CardActions({ meme }) {
-  const { searchMemes, setQuery, removeMeme } = useMemesStore();
+  const { removeMeme } = useMemesStore();
   return (
     <div className='card-actions justify-end mt-2'>
       {meme.local_path && (
         <div className='tooltip' data-tip='Open'>
           <button
             className='btn btn-info'
-            onClick={() => meme.local_path && invoke("show_in_folder", { path: meme.local_path})}
+            onClick={() =>
+              meme.local_path &&
+              invoke("show_in_folder", { path: meme.local_path })
+            }
           >
             <ArrowUpIcon className='size-5' />
           </button>
@@ -90,6 +93,7 @@ function CardActions({ meme }) {
 }
 
 function MemeCardList({ meme }) {
+  const { searchMemes, setQuery } = useMemesStore();
   return (
     <div className='card bg-base-100 shadow-xl min-h-10 card-side'>
       <div className='w-40 m-2 block overflow-hidden relative rounded-box shrink-0'>
@@ -124,6 +128,7 @@ function MemeCardList({ meme }) {
 }
 
 function MemeCardGrid({ meme }) {
+  const { searchMemes, setQuery } = useMemesStore();
   return (
     <div className='card bg-base-100 shadow-xl min-h-10 card-compact'>
       <div className='w-full min-h-40 h-80 block overflow-hidden relative'>
