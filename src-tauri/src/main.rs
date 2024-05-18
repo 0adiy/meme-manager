@@ -7,7 +7,10 @@ mod meme;
 
 use std::vec;
 
-use api::{clear_memes, delete_meme, get_meme, get_memes, insert_meme, search, update_meme, show_in_folder};
+use api::{
+    clear_memes, count_memes, delete_meme, get_meme, get_memes, insert_meme, search,
+    show_in_folder, update_meme,
+};
 use db::Database;
 use tauri::Manager;
 
@@ -40,7 +43,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             insert_meme,
             search,
             update_meme,
-						show_in_folder,
+            count_memes,
+            show_in_folder,
         ]) // Your custom handler
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

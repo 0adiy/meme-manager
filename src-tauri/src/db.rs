@@ -300,11 +300,11 @@ impl Database {
     //     Ok(count == 0)
     // }
 
-    // pub fn count_memes(&self) -> Result<usize, Box<dyn Error>> {
-    //     let conn = self.conn.get_mut().unwrap()
-    //     let mut statement = conn.prepare("SELECT COUNT(*) FROM memes")?;
-    //     let rows = statement.query_map([], |row| Ok(row.get_ref(0)?))?;
-    //     let count: i64 = rows.fold(0, |acc, row| acc + row.unwrap().as_i64().unwrap());
-    //     Ok(count as usize)
-    // }
+    pub fn count_memes(&self) -> Result<usize, Box<dyn Error>> {
+        let conn = self.conn.lock().unwrap();
+        let mut statement = conn.prepare("SELECT COUNT(*) FROM memes")?;
+        let rows = statement.query_map([], |row| Ok(row.get::<usize, i64>(0).unwrap()))?;
+        let count: i64 = rows.fold(0, |acc, row| acc + row.unwrap());
+        Ok(count as usize)
+    }
 }

@@ -8,6 +8,7 @@ import { convertFileSrc } from "@tauri-apps/api/tauri";
 import { useMemesStore } from "../store/useMemesStore";
 import brokenImage from "../assets/brokenIMage.svg";
 import { invoke } from "@tauri-apps/api";
+import VideoPlayer from "./VideoPlayer";
 /**
  * @param {{
  *   meme: {
@@ -34,12 +35,7 @@ function Media({ meme }) {
           }}
         />
       ) : (
-        <video
-          loop
-          controls
-          className='absolute inset-0 w-full h-full object-contain'
-          src={url}
-        />
+        <VideoPlayer src={url} />
       )}
     </>
   );
@@ -80,13 +76,31 @@ function CardActions({ meme }) {
       <div className='tooltip' data-tip='Remove'>
         <button
           className='btn btn-error btn-outline'
-          onClick={() => {
-            // TODO: add confirmation
-            meme.id && removeMeme(meme.id);
-          }}
+          onClick={() =>
+            document.getElementById(`delete-modal-${meme.id}`).showModal()
+          }
         >
           <TrashIcon className='size-5' />
         </button>
+        <dialog id={`delete-modal-${meme.id}`} className='modal'>
+          <div className='modal-box text-left'>
+            <h3 className='font-bold text-lg'>Remove</h3>
+            <p className='py-4'>
+              Are you sure you want to remove <strong>{meme.name}</strong>?
+            </p>
+            <div className='modal-action'>
+              <button
+                className='btn btn-error'
+                onClick={() => meme.id && removeMeme(meme.id)}
+              >
+                Confirm
+              </button>
+              <form method='dialog'>
+                <button className='btn'>Close</button>
+              </form>
+            </div>
+          </div>
+        </dialog>
       </div>
     </div>
   );
@@ -100,7 +114,7 @@ function MemeCardList({ meme }) {
         <Media meme={meme} />
       </div>
       <div className='card-body'>
-        <div className='tooltip' data-tip={meme?.name}>
+        <div className='tooltip tooltip-top w-fit' data-tip={meme?.name}>
           <h2 className='card-title line-clamp-1 text-left'>{meme?.name}</h2>
         </div>
 

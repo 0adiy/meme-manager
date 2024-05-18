@@ -10,6 +10,7 @@ pub struct Meme {
 }
 // TODO - have 2 different structs for read and write
 impl Meme {
+    #[allow(dead_code)]
     pub fn new(
         name: String,
         url: String,
