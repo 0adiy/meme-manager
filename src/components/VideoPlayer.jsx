@@ -4,12 +4,34 @@ import {
   SpeakerWaveIcon,
   SpeakerXMarkIcon,
 } from "@heroicons/react/24/solid";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 export default function VideoPlayer({ src }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const handleUpdateProgress = () => {
+    if (videoRef.current && isPlaying) {
+      const duration = videoRef.current.duration;
+      const currentTime = videoRef.current.currentTime;
+      const progress = Math.floor((currentTime / duration) * 100);
+      setProgress(progress);
+    }
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.addEventListener("timeupdate", handleUpdateProgress);
+      return () => {
+        videoRef.current.removeEventListener(
+          "timeupdate",
+          handleUpdateProgress
+        );
+      };
+    }
+  }, [isPlaying, videoRef.current]);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -62,6 +84,13 @@ export default function VideoPlayer({ src }) {
               <SpeakerWaveIcon className='size-4' />
             )}
           </button>
+        </div>
+        <div className='absolute bottom-0 right-0 left-0 rounded-none h-3'>
+          <progress
+            className='size-full mb-0 pb-0 progress-primary rounded-none'
+            value={progress}
+            max='100'
+          ></progress>
         </div>
       </div>
     </div>
