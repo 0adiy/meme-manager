@@ -26,13 +26,14 @@ export default function MemeForm() {
 
   const handleOnSubmit = e => {
     e.preventDefault();
+    // TODO - validation
     const meme = {
       name: name,
       url: url,
       description: description,
       tags: tags,
       local_path: localPath,
-      filetype: "image", // TODO - add input
+      filetype: filetype,
     };
     console.log(meme);
     insertMeme(meme);

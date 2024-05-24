@@ -5,8 +5,10 @@ export const useMemesStore = create((set, get) => ({
   memes: [],
   setMemes: memes => set({ memes }),
   getMemes: async () => set({ memes: await invoke("get_memes") }),
-  insertMeme: async meme =>
-    set({ memes: await invoke("insert_meme", { meme }) }),
+  insertMeme: async meme => {
+    await invoke("insert_meme", { meme });
+    set({ memes: await invoke("get_memes") });
+  },
   removeMeme: async id => {
     if (id < 1) return;
     await invoke("delete_meme", { id: id.toString() });
