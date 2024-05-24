@@ -24,8 +24,12 @@ pub fn get_meme(id: &str, db: tauri::State<Database>) -> Result<Meme, String> {
 }
 
 #[tauri::command]
-pub fn get_memes(db: tauri::State<Database>) -> Result<Vec<Meme>, String> {
-    let memes = db.get_memes(None, None).unwrap();
+pub fn get_memes(
+    db: tauri::State<Database>,
+    limit: Option<i64>,
+    offset: Option<i64>,
+) -> Result<Vec<Meme>, String> {
+    let memes = db.get_memes(limit, offset).unwrap();
     // printing
     for row in &memes {
         println!("{:?}", row.name);

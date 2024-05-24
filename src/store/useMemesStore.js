@@ -30,4 +30,5 @@ export const useMemesStore = create((set, get) => ({
   setLimit: limit => set({ limit }),
   offset: 0,
   setOffset: offset => set({ offset }),
+  getcount: async () => await invoke("count_memes"),
 }));

@@ -2,7 +2,7 @@ import MemeCard from "../components/MemeCard";
 
 const ListView = ({ items }) => {
   return (
-    <div className='flex flex-col gap-4 m-4 w-full'>
+    <div className='flex flex-col gap-4 m-4 w-full flex-grow'>
       {items?.map(meme => (
         <MemeCard meme={meme} key={meme?.id} list={true} />
       ))}
