@@ -25,7 +25,7 @@ export function Pagination() {
   };
 
   return (
-    <>
+    <div className='flex flex-col sm:flex-row gap-2'>
       <div className='join'>
         <button className='join-item btn' onClick={handelPrevPage}>
           «
@@ -50,6 +50,6 @@ export function Pagination() {
           Jump
         </button>
       </div>
-    </>
+    </div>
   );
 }
