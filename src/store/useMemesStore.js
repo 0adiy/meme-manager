@@ -24,4 +24,8 @@ export const useMemesStore = create((set, get) => ({
   },
   query: "",
   setQuery: query => set({ query }),
+  limit: 10,
+  setLimit: limit => set({ limit }),
+  offset: 0,
+  setOffset: offset => set({ offset }),
 }));
