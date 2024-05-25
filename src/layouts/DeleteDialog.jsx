@@ -17,7 +17,11 @@ export default function DeleteDialog() {
             <div className='modal-action'>
               <button
                 className='btn btn-error'
-                onClick={() => memeToDelete.id && removeMeme(memeToDelete.id)}
+                onClick={() =>
+                  memeToDelete.id &&
+                  removeMeme(memeToDelete.id) &&
+                  resetMemeToDelete()
+                }
               >
                 Confirm
               </button>
