@@ -2,7 +2,7 @@ import { useMemesStore } from "../store/useMemesStore";
 import { useMemeFormStore } from "../store/useMemeFormStore";
 import { open } from "@tauri-apps/api/dialog";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
-import brokenImage from "../assets/brokenIMage.svg";
+import brokenImage from "../assets/brokenImage.svg";
 import { invoke } from "@tauri-apps/api";
 
 export default function MemeFormModal() {
