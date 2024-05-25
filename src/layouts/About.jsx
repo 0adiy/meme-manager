@@ -1,4 +1,7 @@
+import { useThemeStore } from "../store/useThemeStore";
+
 const About = () => {
+  const { theme } = useThemeStore();
   return (
     <>
       <button
@@ -27,7 +30,7 @@ const About = () => {
                 className='btn theme-controller join-item'
                 aria-label='Dark'
                 value='dark'
-                // TODO - handle checked
+                checked={theme === "dark"}
               />
               <input
                 type='radio'
@@ -35,6 +38,7 @@ const About = () => {
                 className='btn theme-controller join-item'
                 aria-label='synthwave'
                 value='synthwave'
+                checked={theme === "synthwave"}
               />
               <input
                 type='radio'
@@ -42,6 +46,7 @@ const About = () => {
                 className='btn theme-controller join-item'
                 aria-label='business'
                 value='business'
+                checked={theme === "business"}
               />
             </div>
             <form method='dialog'>

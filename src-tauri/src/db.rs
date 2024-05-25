@@ -156,7 +156,7 @@ impl Database {
         let limit = limit.unwrap_or(10);
         let offset = offset.unwrap_or(0);
 
-        // TODO - add validation for query
+        // TODO - breaks on hyphens probably
 
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
@@ -226,6 +226,7 @@ impl Database {
                     tags: row
                         .get::<usize, String>(5)?
                         .split(',')
+                        .filter(|s| !s.is_empty())
                         .map(|s| s.to_string())
                         .collect(),
                     filetype: row.get(6)?,
@@ -268,11 +269,21 @@ impl Database {
 
     pub fn update_meme(&self, meme: &Meme) -> Result<(), Box<dyn Error>> {
         let conn = self.conn.lock().unwrap();
-        let mut statement = conn.prepare("UPDATE memes SET url = ? WHERE name = ?")?;
+        let mut statement = conn.prepare(
+					"UPDATE memes 
+					SET name = :name, url = :url, local_path = :local_path, description = :description, tags = :tags, filetype = :filetype
+					WHERE id = :id")?;
         statement
-            .execute([meme.id.unwrap()])
+            .execute(named_params! {
+                ":id": meme.id,
+                ":name": meme.name,
+                ":url": meme.url,
+                ":local_path": meme.local_path,
+                ":description": meme.description,
+                ":tags": meme.tags.join(","),
+                ":filetype": meme.filetype
+            })
             .expect("Failed to update meme");
-        // TODO - SQL needs adjustments
         Ok(())
     }
 

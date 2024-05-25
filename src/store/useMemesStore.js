@@ -14,10 +14,9 @@ export const useMemesStore = create((set, get) => ({
     await invoke("delete_meme", { id: id.toString() });
     set({ memes: await invoke("get_memes") });
   },
-  updateMeme: async newMeme => {
-    const oldMeme = await invoke("get_meme", { id: `${newMeme.id}` });
+  updateMeme: async (id, newMeme) => {
+    const oldMeme = await invoke("get_meme", { id: `${id}` });
     const meme = { ...oldMeme, ...newMeme };
-    meme.id = `${meme.id}`;
     await invoke("update_meme", { meme });
     set({ memes: await invoke("get_memes") });
   },

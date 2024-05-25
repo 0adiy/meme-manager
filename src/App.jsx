@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useMemesStore } from "./store/useMemesStore.js";
 import Navbar from "./layouts/Navbar.jsx";
 import { Pagination } from "./layouts/Pagination.jsx";
+import DeleteDialog from "./layouts/DeleteDialog.jsx";
+import MemeFormModal from "./layouts/MemeFormModal.jsx";
 
 function App() {
   const [view, setView] = useState("list");
@@ -22,6 +24,8 @@ function App() {
       <Navbar setView={setView} view={view} />
       {view === "list" && <ListView items={memes} />}
       {view === "grid" && <GridView items={memes} />}
+      <DeleteDialog />
+      <MemeFormModal />
       <Pagination />
     </div>
   );

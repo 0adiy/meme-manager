@@ -19,6 +19,7 @@ pub fn search(query: &str, db: tauri::State<Database>) -> Result<Vec<Meme>, Stri
 
 #[tauri::command]
 pub fn get_meme(id: &str, db: tauri::State<Database>) -> Result<Meme, String> {
+    println!("get_meme: {}", id);
     db.get_meme(id)
         .map_err(|_| "Failed to get meme".to_string())
 }
@@ -31,9 +32,11 @@ pub fn get_memes(
 ) -> Result<Vec<Meme>, String> {
     let memes = db.get_memes(limit, offset).unwrap();
     // printing
+    print!("memes: ");
     for row in &memes {
-        println!("{:?}", row.name);
+        print!("{:?},", row.name);
     }
+    println!();
     Ok(memes)
 }
 
@@ -57,6 +60,7 @@ pub fn delete_meme(id: &str, db: tauri::State<Database>) -> Result<(), String> {
 
 #[tauri::command]
 pub fn update_meme(meme: Meme, db: tauri::State<Database>) -> Result<(), String> {
+    println!("update_meme: {:?}", meme);
     db.update_meme(&meme).unwrap();
     println!("updated meme {:?}", meme);
     Ok(())

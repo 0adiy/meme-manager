@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 const setup = (set, get) => ({
+  id: 0,
+  setId: id => set({ id }),
   name: "",
   setName: name => set({ name }),
   url: "",
@@ -9,12 +11,23 @@ const setup = (set, get) => ({
   description: "",
   setDescription: description => set({ description }),
   tags: [],
-  setTags: t => set({ tags: t.split(",") }),
+  setTags: tags => set({ tags }),
   localPath: "",
   setLocalPath: localPath => set({ localPath }),
   filetype: "image",
   setFiletype: filetype => set({ filetype }),
-  reset: () => set({ name: "", url: "", description: "", tags: [] }),
+  reset: () =>
+    set({
+      name: "",
+      url: "",
+      description: "",
+      tags: [],
+      localPath: "",
+      filetype: "image",
+    }),
+  mode: "add",
+  setModeAdd: () => set({ mode: "add" }),
+  setModeUpdate: () => set({ mode: "update" }),
 });
 
 export const useMemeFormStore = create(

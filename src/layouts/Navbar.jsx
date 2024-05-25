@@ -1,7 +1,7 @@
 import { TableCellsIcon, QueueListIcon } from "@heroicons/react/24/outline";
 import About from "./About.jsx";
 import SearchBox from "../components/SearchBox.jsx";
-import MemeForm from "../components/MemeForm.jsx";
+import MemeForm from "../components/AddMemeButton.jsx";
 
 export default function Navbar({ view, setView }) {
   return (

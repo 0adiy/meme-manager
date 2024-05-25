@@ -6,9 +6,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 import { useMemesStore } from "../store/useMemesStore";
+import { useMemeFormStore } from "../store/useMemeFormStore";
 import brokenImage from "../assets/brokenIMage.svg";
 import { invoke } from "@tauri-apps/api";
 import VideoPlayer from "./VideoPlayer";
+import { useDeleteStore } from "../store/useDeleteStore";
 /**
  * @param {{
  *   meme: {
@@ -42,65 +44,75 @@ function Media({ meme }) {
 }
 
 function CardActions({ meme }) {
-  const { removeMeme } = useMemesStore();
+  const {
+    setId,
+    setName,
+    setUrl,
+    setLocalPath,
+    setFiletype,
+    reset,
+    setTags,
+    setDescription,
+    setModeAdd,
+    setModeUpdate,
+  } = useMemeFormStore();
+  const { setMemeToDelete } = useDeleteStore();
+  function handleOpenInFolder() {
+    meme.local_path && invoke("show_in_folder", { path: meme.local_path });
+  }
+
+  function handleCopyUrl() {
+    meme.url && navigator.clipboard.writeText(meme.url);
+  }
+
+  function handleOpenUpdateModal() {
+    reset();
+    setId(meme.id);
+    setName(meme.name);
+    setUrl(meme.url);
+    setLocalPath(meme.local_path);
+    setFiletype(meme.filetype);
+    setTags(meme.tags);
+    setDescription(meme.description);
+    setModeUpdate();
+    document.getElementById("add_or_update_meme_modal").showModal();
+  }
+
+  function handelOpenDeleteModal() {
+    setMemeToDelete(meme);
+  }
+
   return (
     <div className='card-actions justify-end mt-2'>
       {meme.local_path && (
-        <div className='tooltip' data-tip='Open'>
-          <button
-            className='btn btn-info'
-            onClick={() =>
-              meme.local_path &&
-              invoke("show_in_folder", { path: meme.local_path })
-            }
-          >
+        <div className='tooltip' data-tip='Open Local'>
+          <button className='btn btn-info' onClick={handleOpenInFolder}>
             <ArrowUpIcon className='size-5' />
           </button>
         </div>
       )}
       {meme.url && (
         <div className='tooltip' data-tip='Copy'>
-          <button
-            className='btn btn-info'
-            onClick={() => meme.url && navigator.clipboard.writeText(meme.url)}
-          >
+          <button className='btn btn-info' onClick={handleCopyUrl}>
             <ClipboardDocumentListIcon className='size-5' />
           </button>
         </div>
       )}
       <div className='tooltip' data-tip='Update'>
-        <button className='btn btn-accent btn-outline'>
+        <button
+          className='btn btn-accent btn-outline'
+          onClick={handleOpenUpdateModal}
+        >
           <PencilIcon className='size-5' />
         </button>
       </div>
       <div className='tooltip' data-tip='Remove'>
         <button
           className='btn btn-error btn-outline'
-          onClick={() =>
-            document.getElementById(`delete-modal-${meme.id}`).showModal()
-          }
+          onClick={handelOpenDeleteModal}
         >
           <TrashIcon className='size-5' />
         </button>
-        <dialog id={`delete-modal-${meme.id}`} className='modal'>
-          <div className='modal-box text-left'>
-            <h3 className='font-bold text-lg'>Remove</h3>
-            <p className='py-4'>
-              Are you sure you want to remove <strong>{meme.name}</strong>?
-            </p>
-            <div className='modal-action'>
-              <button
-                className='btn btn-error'
-                onClick={() => meme.id && removeMeme(meme.id)}
-              >
-                Confirm
-              </button>
-              <form method='dialog'>
-                <button className='btn'>Close</button>
-              </form>
-            </div>
-          </div>
-        </dialog>
       </div>
     </div>
   );

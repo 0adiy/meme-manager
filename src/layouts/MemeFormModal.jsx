@@ -1,14 +1,14 @@
 import { useMemesStore } from "../store/useMemesStore";
 import { useMemeFormStore } from "../store/useMemeFormStore";
-import { PlusIcon } from "@heroicons/react/24/outline";
 import { open } from "@tauri-apps/api/dialog";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 import brokenImage from "../assets/brokenIMage.svg";
 import { invoke } from "@tauri-apps/api";
 
-export default function MemeForm() {
-  const { insertMeme } = useMemesStore();
+export default function MemeFormModal() {
+  const { insertMeme, updateMeme } = useMemesStore();
   const {
+    id,
     name,
     url,
     description,
@@ -22,11 +22,12 @@ export default function MemeForm() {
     setLocalPath,
     setFiletype,
     reset,
+    mode,
   } = useMemeFormStore();
 
   const handleOnSubmit = e => {
     e.preventDefault();
-    // TODO - validation
+    // TODO - validation and check insert or update
     const meme = {
       name: name,
       url: url,
@@ -36,10 +37,11 @@ export default function MemeForm() {
       filetype: filetype,
     };
     console.log(meme);
-    insertMeme(meme);
+    if (mode === "add") insertMeme(meme);
+    if (mode === "update") updateMeme(id, meme);
     reset();
     // close modal
-    document.getElementById("add_meme_modal").close();
+    document.getElementById("add_or_update_meme_modal").close();
   };
 
   const handelFileOpen = async e => {
@@ -81,17 +83,11 @@ export default function MemeForm() {
 
   return (
     <>
-      <div className='tooltip-bottom tooltip' data-tip='Add Meme'>
-        <button
-          className='btn btn-primary mx-4'
-          onClick={() => document.getElementById("add_meme_modal").showModal()}
-        >
-          <PlusIcon className='size-5' />
-        </button>
-      </div>
-      <dialog id='add_meme_modal' className='modal'>
+      <dialog id='add_or_update_meme_modal' className='modal'>
         <div className='modal-box'>
-          <h3 className='font-bold text-lg mb-4'>Meme Form</h3>
+          <h3 className='font-bold text-lg mb-4'>
+            {mode === "add" ? "Add Meme" : "Update Meme"}
+          </h3>
 
           <form action='' className='flex flex-col gap-2'>
             <div className='flex flex-col w-full lg:flex-row'>
@@ -116,11 +112,18 @@ export default function MemeForm() {
                 <textarea
                   className='textarea textarea-bordered textarea-xs w-full text-base px-3'
                   placeholder='Tags (Comma separated)'
-                  onChange={e => setTags(e.target.value)}
+                  onChange={e => {
+                    const x = e.target.value;
+                    if (x.length > 0) {
+                      setTags(x.split(","));
+                    } else {
+                      setTags([]);
+                    }
+                  }}
                   value={tags}
                   id='tags'
                   rows='2'
-                />{" "}
+                />
                 <textarea
                   className='textarea textarea-bordered textarea-xs w-full text-base px-3'
                   placeholder='Description'
@@ -184,7 +187,7 @@ export default function MemeForm() {
                 type='button'
                 onClick={e => {
                   e.preventDefault();
-                  document.getElementById("add_meme_modal").close();
+                  document.getElementById("add_or_update_meme_modal").close();
                 }}
               >
                 Close
