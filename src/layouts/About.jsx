@@ -1,7 +1,7 @@
 import { useThemeStore } from "../store/useThemeStore";
 
 const About = () => {
-  const { theme } = useThemeStore();
+  const { theme, setTheme } = useThemeStore();
   return (
     <>
       <button
@@ -31,6 +31,7 @@ const About = () => {
                 aria-label='Dark'
                 value='dark'
                 checked={theme === "dark"}
+                onClick={() => setTheme("dark")}
               />
               <input
                 type='radio'
@@ -39,6 +40,7 @@ const About = () => {
                 aria-label='synthwave'
                 value='synthwave'
                 checked={theme === "synthwave"}
+                onClick={() => setTheme("synthwave")}
               />
               <input
                 type='radio'
@@ -47,6 +49,7 @@ const About = () => {
                 aria-label='business'
                 value='business'
                 checked={theme === "business"}
+                onClick={() => setTheme("business")}
               />
             </div>
             <form method='dialog'>
