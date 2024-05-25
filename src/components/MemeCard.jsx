@@ -7,7 +7,7 @@ import {
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 import { useMemesStore } from "../store/useMemesStore";
 import { useMemeFormStore } from "../store/useMemeFormStore";
-import brokenImage from "../assets/brokenIMage.svg";
+import brokenImage from "../assets/brokenImage.svg";
 import { invoke } from "@tauri-apps/api";
 import VideoPlayer from "./VideoPlayer";
 import { useDeleteStore } from "../store/useDeleteStore";
