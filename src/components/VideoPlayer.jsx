@@ -3,11 +3,15 @@ import {
   PlayIcon,
   SpeakerWaveIcon,
   SpeakerXMarkIcon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
 } from "@heroicons/react/24/solid";
 import { useRef, useState } from "react";
 
 export default function VideoPlayer({ src }) {
   const videoRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -53,8 +57,18 @@ export default function VideoPlayer({ src }) {
     }
   };
 
+  function handleFullScreen() {
+    if (isFullScreen) {
+      setIsFullScreen(false);
+      document.exitFullscreen();
+    } else {
+      setIsFullScreen(true);
+      wrapperRef.current?.requestFullscreen();
+    }
+  }
+
   return (
-    <div className='relative w-full h-full'>
+    <div className='relative w-full h-full' ref={wrapperRef}>
       <video
         ref={videoRef}
         className='w-full h-full object-contain'
@@ -101,6 +115,16 @@ export default function VideoPlayer({ src }) {
               <SpeakerXMarkIcon className='size-4' />
             ) : (
               <SpeakerWaveIcon className='size-4' />
+            )}
+          </button>
+          <button
+            onClick={handleFullScreen}
+            className='p-1 m-0 text-4xl text-white bg-base-300 rounded-full'
+          >
+            {isFullScreen ? (
+              <ArrowsPointingInIcon className='size-4' />
+            ) : (
+              <ArrowsPointingOutIcon className='size-4' />
             )}
           </button>
         </div>
