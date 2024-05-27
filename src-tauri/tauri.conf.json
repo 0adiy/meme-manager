@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "meme-manager",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "tauri": {
     "allowlist": {
@@ -37,7 +37,12 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; media-src 'self' asset: https://asset.localhost;"
+      "csp": {
+        "default-src": "self",
+        "img-src": "'self' https://* asset: https://asset.localhost",
+        "media-src": "'self' https://* asset: https://asset.localhost",
+        "style-src-elem": "'self' 'unsafe-inline'"
+      }
     },
     "bundle": {
       "active": true,

@@ -1,7 +1,10 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
-
+import { useMemeFormStore } from "../store/useMemeFormStore";
 export default function AddMemeButton() {
+  const { setModeAdd, reset } = useMemeFormStore();
   const handelClick = () => {
+    reset();
+    setModeAdd();
     document.getElementById("add_or_update_meme_modal").showModal();
   };
   return (
