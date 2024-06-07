@@ -1,7 +1,7 @@
-import { useThemeStore } from "../store/useThemeStore";
+import { usePreferenceStore } from "../store/usePreferenceStore.js";
 
 const About = () => {
-  const { theme, setTheme } = useThemeStore();
+  const { theme, setTheme } = usePreferenceStore();
   return (
     <>
       <button

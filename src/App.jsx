@@ -6,11 +6,10 @@ import Navbar from "./layouts/Navbar.jsx";
 import { Pagination } from "./layouts/Pagination.jsx";
 import DeleteDialog from "./layouts/DeleteDialog.jsx";
 import MemeFormModal from "./layouts/MemeFormModal.jsx";
-import { useThemeStore } from "./store/useThemeStore.js";
+import { usePreferenceStore } from "./store/usePreferenceStore.js";
 
 function App() {
-  const { theme } = useThemeStore();
-  const [view, setView] = useState("list");
+  const { theme, viewMode } = usePreferenceStore();
   const { getMemes, memes } = useMemesStore();
 
   useEffect(() => {
@@ -22,9 +21,12 @@ function App() {
       className='pb-4 w-full min-h-screen bg-base-300 flex flex-col justify-start items-center space-y-2'
       data-theme={theme}
     >
-      <Navbar setView={setView} view={view} />
-      {view === "list" && <ListView items={memes} />}
-      {view === "grid" && <GridView items={memes} />}
+      <Navbar />
+      {viewMode === "grid" ? (
+        <GridView items={memes} />
+      ) : (
+        <ListView items={memes} />
+      )}
       <DeleteDialog />
       <MemeFormModal />
       <Pagination />

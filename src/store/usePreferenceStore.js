@@ -4,11 +4,14 @@ import { persist, createJSONStorage } from "zustand/middleware";
 const setup = set => ({
   theme: "dark",
   setTheme: theme => set({ theme }),
+  viewMode: "grid",
+  setListMode: () => set({ viewMode: "list" }),
+  setGridMode: () => set({ viewMode: "grid" }),
 });
 
-export const useThemeStore = create(
+export const usePreferenceStore = create(
   persist(setup, {
-    name: "theme-store",
+    name: "preference-store",
     storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
   })
 );
