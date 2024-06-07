@@ -22,16 +22,18 @@ function SearchBox() {
 
   return (
     <form className='flex items-center gap-2 flex-1 justify-center'>
-      <label className='input input-bordered flex items-center gap-2 bg-base-300'>
+      <label className='input input-bordered flex items-center gap-2 bg-base-300 w-80'>
         <input
           ref={inputRef}
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={e => {
+            setQuery(e.target.value);
+            searchMemes(query);
+          }}
           type='text'
           className='grow'
           placeholder='Search'
         />
-        {/* REVIEW - slight difference in width for each case */}
         {!query ? (
           <>
             <kbd className='kbd'>⌘</kbd>
@@ -39,16 +41,6 @@ function SearchBox() {
           </>
         ) : (
           <>
-            <button
-              type='submit'
-              className='btn btn-circle btn-sm btn-primary ml-1'
-              onClick={e => {
-                e.preventDefault();
-                searchMemes(query);
-              }}
-            >
-              <MagnifyingGlassIcon className='size-4' />
-            </button>
             <button
               className='btn btn-neutral btn-circle btn-sm btn-outline mr-1'
               onClick={e => {
