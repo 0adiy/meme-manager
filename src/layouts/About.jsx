@@ -5,10 +5,10 @@ const About = () => {
   return (
     <>
       <button
-        className='btn btn-ghost normal-case text-xl'
+        className='btn btn-ghost normal-case text-xl ml-2'
         onClick={() => document.getElementById("about_modal").showModal()}
       >
-        Meme Manager
+        <img src='/icon.png' className='size-8' />
       </button>
       <dialog id='about_modal' className='modal'>
         <div className='modal-box'>
@@ -50,6 +50,15 @@ const About = () => {
                 value='business'
                 checked={theme === "business"}
                 onClick={() => setTheme("business")}
+              />
+              <input
+                type='radio'
+                name='theme-buttons'
+                className='btn theme-controller join-item'
+                aria-label='light'
+                value='light'
+                checked={theme === "light"}
+                onClick={() => setTheme("light")}
               />
             </div>
             <form method='dialog'>

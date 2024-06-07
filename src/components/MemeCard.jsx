@@ -121,7 +121,7 @@ function CardActions({ meme }) {
 function MemeCardList({ meme }) {
   const { searchMemes, setQuery } = useMemesStore();
   return (
-    <div className='card bg-base-100 shadow-xl min-h-10 card-side'>
+    <div className='card bg-base-100 shadow-xl min-h-10 card-side max-w-screen-lg w-full'>
       <div className='w-40 m-2 block overflow-hidden relative rounded-box shrink-0'>
         <Media meme={meme} />
       </div>

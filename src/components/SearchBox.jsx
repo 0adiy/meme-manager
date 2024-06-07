@@ -21,7 +21,7 @@ function SearchBox() {
   }, []);
 
   return (
-    <form className='flex items-center gap-2 flex-1 justify-center'>
+    <form className='flex items-center gap-2 flex-1'>
       <label className='input input-bordered flex items-center gap-2 bg-base-300 w-80'>
         <input
           ref={inputRef}

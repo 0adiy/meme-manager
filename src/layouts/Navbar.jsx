@@ -7,28 +7,25 @@ import { usePreferenceStore } from "../store/usePreferenceStore.js";
 export default function Navbar() {
   const { viewMode, setListMode, setGridMode } = usePreferenceStore();
   return (
-    <div className='navbar bg-neutral sticky top-0 z-10'>
-      <About />
+    <div className='navbar bg-base-100 sticky top-0 z-10'>
       <SearchBox />
       <MemeForm />
-      <ul className='menu menu-horizontal bg-base-200 rounded-box'>
-        <li>
-          <button
-            className={viewMode === "list" ? "active" : ""}
-            onClick={setListMode}
-          >
-            <QueueListIcon className='size-6' />
-          </button>
-        </li>
-        <li>
-          <button
-            className={viewMode === "grid" ? "active" : ""}
-            onClick={setGridMode}
-          >
-            <TableCellsIcon className='size-6' />
-          </button>
-        </li>
-      </ul>
+      <div className='join'>
+        <button
+          className={`btn join-item ${viewMode === "list" && "btn-active"}`}
+          onClick={setListMode}
+        >
+          <QueueListIcon className='size-6' />
+        </button>
+        <button
+          // className={viewMode === "grid" ? "active" : ""}
+          className={`btn join-item ${viewMode === "grid" && "btn-active"}`}
+          onClick={setGridMode}
+        >
+          <TableCellsIcon className='size-6' />
+        </button>
+      </div>
+      <About />
     </div>
   );
 }

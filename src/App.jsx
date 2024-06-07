@@ -27,8 +27,10 @@ function App() {
       ) : (
         <ListView items={memes} />
       )}
+      {/* Opens when needed, but need to be always available in html */}
       <DeleteDialog />
       <MemeFormModal />
+
       <Pagination />
     </div>
   );
