@@ -8,7 +8,11 @@ export default function Navbar() {
   const { viewMode, setListMode, setGridMode } = usePreferenceStore();
   return (
     <div className='navbar bg-base-100 sticky top-0 z-10'>
-      <SearchBox />
+      <img src='/icon.png' className='size-9' />
+      <p className='hidden md:block text-xl font-bold mx-4'>Meme Manager</p>
+      <div className='mx-auto'>
+        <SearchBox />
+      </div>
       <MemeForm />
       <div className='join'>
         <button
@@ -24,7 +28,7 @@ export default function Navbar() {
         >
           <TableCellsIcon className='size-6' />
         </button>
-      </div>
+      </div>{" "}
       <About />
     </div>
   );

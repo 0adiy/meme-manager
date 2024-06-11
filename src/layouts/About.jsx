@@ -1,3 +1,4 @@
+import { Cog8ToothIcon } from "@heroicons/react/24/outline";
 import { usePreferenceStore } from "../store/usePreferenceStore.js";
 
 const About = () => {
@@ -5,14 +6,15 @@ const About = () => {
   return (
     <>
       <button
-        className='btn btn-ghost normal-case text-xl ml-2'
+        className='btn normal-case text-xl ml-2'
         onClick={() => document.getElementById("about_modal").showModal()}
       >
-        <img src='/icon.png' className='size-8' />
+        <Cog8ToothIcon className='size-6' />
       </button>
       <dialog id='about_modal' className='modal'>
         <div className='modal-box'>
           <h3 className='font-bold text-lg'>About</h3>
+          <img src='/icon.png' className='size-40 mx-auto' />
           <p className='py-4'>
             A beautiful meme manager developed by an equally beautiful
             developer. Focusing on performance and UI with Rust and Tauri. Made

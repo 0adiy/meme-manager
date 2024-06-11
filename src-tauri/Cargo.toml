@@ -24,6 +24,9 @@ fork = "0.1.23"
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
 
+[profile.dev]
+incremental = true # Compile your binary in smaller steps.
+
 [profile.release]
 panic = "abort" # Strip expensive panic clean-up logic
 codegen-units = 1 # Compile crates one at a time
