@@ -21,7 +21,14 @@ export const useMemesStore = create((set, get) => ({
     set({ memes: await invoke("get_memes") });
   },
   searchMemes: async () => {
-    set({ memes: await invoke("search", { query: get().query }) });
+    set({
+      memes: await invoke("search", {
+        query: get().query,
+        limit: get().limit,
+        offset: get().offset,
+        order_by: get().order_by || "date",
+      }),
+    });
   },
   query: "",
   setQuery: query => set({ query }),

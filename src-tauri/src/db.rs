@@ -1,7 +1,7 @@
 // REVIEW - remove in production
 #![allow(dead_code)]
 
-use rusqlite::{named_params, Connection};
+use rusqlite::{named_params, params_from_iter, Connection};
 use std::sync::{Arc, Mutex};
 use std::{error::Error, fs, path::Path};
 
@@ -152,49 +152,121 @@ impl Database {
         query: &str,
         limit: Option<i64>,
         offset: Option<i64>,
+        media_type: Option<String>,
+        date_from: Option<String>,
+        date_to: Option<String>,
+        order_by: Option<String>,
     ) -> Result<Vec<Meme>, Box<dyn Error>> {
-        let limit = limit.unwrap_or(10);
-        let offset = offset.unwrap_or(0);
+        // prepare the query
+        let mut sql = "
+    SELECT m.id, m.name, m.url, m.local_path, m.description, m.tags, m.filetype
+    FROM memes AS m
+    INNER JOIN memes_fts AS fts ON m.id = fts.id
+    WHERE memes_fts MATCH ?"
+            .to_string();
 
-        // TODO - breaks on hyphens probably
+        let mut params: Vec<&str> = vec![&query];
+
+        // Add filters based on conditions
+        if let Some(media_type) = media_type.as_deref() {
+            sql.push_str(" AND m.filetype = ?");
+            params.push(&media_type);
+        }
+
+        if let (Some(date_from), Some(date_to)) = (date_from.as_deref(), date_to.as_deref()) {
+            sql.push_str(" AND m.date_column BETWEEN ? AND ?"); // REVIEW : no date_column exists currently
+            params.push(&date_from);
+            params.push(&date_to);
+        }
+
+        if let Some(x) = order_by {
+            sql.push_str(" ORDER BY ");
+            sql.push_str(x.as_str());
+        } else {
+            sql.push_str(" ORDER BY fts.rank");
+        }
+
+        let limit_val_str: String;
+        if let Some(limit_val) = limit {
+            sql.push_str(" LIMIT ?");
+            limit_val_str = limit_val.to_string();
+            params.push(&limit_val_str);
+        }
+
+        let offset_val_str: String;
+        if let Some(offset_val) = offset {
+            sql.push_str(" OFFSET ?");
+            offset_val_str = offset_val.to_string();
+            params.push(&offset_val_str);
+        }
 
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(
-            "
-        SELECT m.id, m.name, m.url, m.local_path, m.description, m.tags, m.filetype
-        FROM memes AS m
-        INNER JOIN memes_fts AS fts ON m.id = fts.id
-        WHERE memes_fts MATCH ?
-				ORDER BY fts.rank 
-				LIMIT ? OFFSET ?
-        ",
-        )?;
+        let mut stmt = conn.prepare(&sql)?;
+
+        let paramsx = params_from_iter(params.iter());
 
         let rows = stmt
-            .query_map(
-                &[
-                    &query,
-                    &limit.to_string().as_str(),
-                    &offset.to_string().as_str(),
-                ],
-                |row| {
-                    Ok(Meme {
-                        id: row.get(0)?,
-                        name: row.get(1)?,
-                        url: row.get(2)?,
-                        local_path: row.get(3)?,
-                        description: row.get(4)?,
-                        tags: row
-                            .get::<usize, String>(5)?
-                            .split(',')
-                            .map(|s| s.to_string())
-                            .collect(),
-                        filetype: row.get(6)?,
-                    })
-                },
-            )?
+            .query_map(paramsx, |row| {
+                Ok(Meme {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    url: row.get(2)?,
+                    local_path: row.get(3)?,
+                    description: row.get(4)?,
+                    tags: row
+                        .get::<usize, String>(5)?
+                        .split(',')
+                        .map(|s| s.to_string())
+                        .collect(),
+                    filetype: row.get(6)?,
+                })
+            })?
             .collect::<Result<Vec<Meme>, _>>()?;
+
         Ok(rows)
+
+        //     let limit = limit.unwrap_or(10);
+        //     let offset = offset.unwrap_or(0);
+
+        //     // TODO - breaks on hyphens probably
+
+        //     let conn = self.conn.lock().unwrap();
+        //     let mut stmt = conn.prepare(
+        //         "
+        //     SELECT m.id, m.name, m.url, m.local_path, m.description, m.tags, m.filetype
+        //     FROM memes AS m
+        //     INNER JOIN memes_fts AS fts ON m.id = fts.id
+        //     WHERE memes_fts MATCH ?
+        // 		ORDER BY fts.rank
+        // 		LIMIT ? OFFSET ?
+        //     ",
+        //     )?;
+
+        //     let rows = stmt
+        //         .query_map(
+        //             &[
+        //                 &query,
+        //                 &limit.to_string().as_str(),
+        //                 &offset.to_string().as_str(),
+        //             ],
+        //             |row| {
+        //                 Ok(Meme {
+        //                     id: row.get(0)?,
+        //                     name: row.get(1)?,
+        //                     url: row.get(2)?,
+        //                     local_path: row.get(3)?,
+        //                     description: row.get(4)?,
+        //                     tags: row
+        //                         .get::<usize, String>(5)?
+        //                         .split(',')
+        //                         .map(|s| s.to_string())
+        //                         .collect(),
+        //                     filetype: row.get(6)?,
+        //                 })
+        //             },
+        //         )?
+        //         .collect::<Result<Vec<Meme>, _>>()?;
+        //     Ok(rows)
     }
 
     pub fn get_memes(

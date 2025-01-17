@@ -2,7 +2,16 @@ use crate::db::Database;
 use crate::meme::Meme;
 
 #[tauri::command]
-pub fn search(query: &str, db: tauri::State<Database>) -> Result<Vec<Meme>, String> {
+pub fn search(
+    query: &str,
+    limit: Option<i64>,
+    offset: Option<i64>,
+    media_type: Option<String>,
+    date_form: Option<String>,
+    date_to: Option<String>,
+    order_by: Option<String>,
+    db: tauri::State<Database>,
+) -> Result<Vec<Meme>, String> {
     // println!("{}\n\n\n\n", query);
     let query = query.trim();
     if query.is_empty() {
@@ -11,7 +20,9 @@ pub fn search(query: &str, db: tauri::State<Database>) -> Result<Vec<Meme>, Stri
             Err(e) => return Err(e.to_string()),
         };
     }
-    match db.search_memes(query, None, None) {
+    match db.search_memes(
+        query, limit, offset, media_type, date_form, date_to, order_by,
+    ) {
         Ok(memes) => return Ok(memes),
         Err(e) => return Err(e.to_string()),
     }
