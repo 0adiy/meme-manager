@@ -26,14 +26,14 @@ impl Database {
 
     // Function to create triggers (consider placing it in a separate module)
     fn create_triggers(conn: &Connection) -> Result<(), Box<dyn Error>> {
-        // Trigger for INSERT (already explained in previous response)
+        // Trigger for INSERT
         conn.execute(
             "CREATE TRIGGER IF NOT EXISTS after_insert_meme
 			AFTER INSERT ON memes
 			FOR EACH ROW
 			BEGIN
-				INSERT INTO memes_fts (id, name, description, tags)
-				VALUES (NEW.id, NEW.name, NEW.description, NEW.tags);
+				INSERT INTO memes_fts (id, name, description, tags, filetype)
+				VALUES (NEW.id, NEW.name, NEW.description, NEW.tags, NEW.filetype);
 			END;",
             [],
         )?;
@@ -44,10 +44,17 @@ impl Database {
 			AFTER UPDATE ON memes
 			FOR EACH ROW
 			BEGIN
-				DELETE FROM memes_fts WHERE id = OLD.id;
-				INSERT INTO memes_fts (id, name, description, tags)
-				VALUES (NEW.id, NEW.name, NEW.description, NEW.tags);
-			END;",
+				UPDATE memes_fts 
+				SET 
+					name = NEW.name,
+					description = NEW.description,
+					tags = NEW.tags,
+					filetype = NEW.filetype
+				WHERE id = OLD.id;
+				-- DELETE FROM memes_fts WHERE id = OLD.id;
+				-- INSERT INTO memes_fts (id, name, description, tags)
+				-- VALUES (NEW.id, NEW.name, NEW.description, NEW.tags);
+			END;", // TODO : delete commented lines
             [],
         )?;
 
@@ -66,6 +73,7 @@ impl Database {
     }
 
     fn create_memes_table(conn: &Connection) -> Result<(), Box<dyn Error>> {
+        // TODO : add Created at and Updated at columns
         conn.execute(
             "CREATE TABLE if NOT EXISTS memes (
 							id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,7 +82,9 @@ impl Database {
 							local_path  TEXT,
 							description TEXT,
 							tags        TEXT,
-							filetype    TEXT
+							filetype    TEXT,
+							created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+							updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 					)",
             (),
         )?;
@@ -343,7 +353,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let mut statement = conn.prepare(
 					"UPDATE memes 
-					SET name = :name, url = :url, local_path = :local_path, description = :description, tags = :tags, filetype = :filetype
+					SET name = :name, url = :url, local_path = :local_path, description = :description, tags = :tags, filetype = :filetype, updated_at = CURRENT_TIMESTAMP
 					WHERE id = :id")?;
         statement
             .execute(named_params! {
