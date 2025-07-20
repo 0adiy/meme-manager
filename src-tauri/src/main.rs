@@ -4,6 +4,7 @@
 mod api;
 mod db;
 mod meme;
+mod ocr;
 
 use std::vec;
 
@@ -45,6 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             update_meme,
             count_memes,
             show_in_folder,
+            ocr::extract_text_from_image,
         ]) // Your custom handler
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
