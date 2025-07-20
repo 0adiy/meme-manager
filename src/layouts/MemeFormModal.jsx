@@ -44,41 +44,73 @@ export default function MemeFormModal() {
     document.getElementById("add_or_update_meme_modal").close();
   };
 
-  const handelFileOpen = async e => {
-    const filePath = await open({
-      multiple: false,
-      filters: [
-        {
-          name: "Images",
-          extensions: [
-            "jpg",
-            "png",
-            "jpeg",
-            "gif",
-            "webp",
-            "heic",
-            "tiff",
-            "bmp",
-          ],
-        },
-        {
-          name: "Video",
-          extensions: [
-            "mp4",
-            "webm",
-            "mov",
-            "avi",
-            "mkv",
-            "flv",
-            "ogv",
-            "wmv",
-            "mpg",
-            "mpeg",
-          ],
-        },
-      ],
-    });
-    setLocalPath(filePath);
+  const handleFileOpen = async e => {
+    const imageExtensions = ["jpg", "png", "jpeg", "gif", "webp", "heic", "tiff", "bmp"];
+    try {
+      const filePath = await open({
+        multiple: false,
+        filters: [
+          {
+            name: "Images",
+            extensions: imageExtensions,
+          },
+          {
+            name: "Video",
+            extensions: [
+              "mp4",
+              "webm",
+              "mov",
+              "avi",
+              "mkv",
+              "flv",
+              "ogv",
+              "wmv",
+              "mpg",
+              "mpeg",
+            ],
+          },
+        ],
+      });
+      
+      console.log("Selected file:", filePath);
+      if(!filePath) {
+        console.log("No file selected");
+        return;
+      }
+      
+      setLocalPath(filePath);
+      const ext = filePath.split(".").pop().toLowerCase();
+      console.log("File extension:", ext);
+      
+      //run ocr only on images
+      if (imageExtensions.includes(ext)) {
+        console.log("File is an image, running OCR");
+        setFiletype("image");
+        try {
+          console.log("Invoking extract_text_from_image with path:", filePath);
+          const text = await invoke("extract_text_from_image", { path: filePath });
+          console.log("OCR result received:", text);
+          console.log("OCR result type:", typeof text);
+          console.log("OCR result length:", text ? text.length : 0);
+          
+          if (text && text.trim().length > 0) {
+            const trimmedText = text.trim();
+            console.log("Setting description to:", trimmedText);
+            setDescription(trimmedText);
+          } else {
+            console.log("OCR returned empty or whitespace-only text");
+          }
+        } catch (error) {
+          console.error("OCR failed with error:", error);
+          console.error("Error type:", typeof error);
+          console.error("Error message:", error.message || error);
+        }
+      } else {
+        setFiletype("video");
+      }
+    } catch (error) {
+      console.error("Failure:", error);
+    }
   };
 
   return (
@@ -126,7 +158,7 @@ export default function MemeFormModal() {
                 />
                 <textarea
                   className='textarea textarea-bordered textarea-xs w-full text-base px-3'
-                  placeholder='Description'
+                  placeholder='Description (Auto-filled from OCR)'
                   onChange={e => setDescription(e.target.value)}
                   value={description}
                   id='description'
@@ -148,7 +180,7 @@ export default function MemeFormModal() {
                 <input
                   type='button'
                   className='btn btn-neutral w-full'
-                  onClick={handelFileOpen}
+                  onClick={handleFileOpen}
                   value={"Select File"}
                 />
                 <label className='label cursor-pointer mx-auto w-fit gap-2'>
