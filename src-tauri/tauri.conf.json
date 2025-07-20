@@ -59,6 +59,7 @@
         },
         "wix": null
       },
+      "resources": ["../resources/tesseract"],
       "active": true,
       "targets": "all",
       "identifier": "com.bisskut.dev",
