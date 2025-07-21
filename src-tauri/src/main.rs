@@ -4,6 +4,7 @@
 mod api;
 mod db;
 mod meme;
+mod ocr;
 
 use std::vec;
 
@@ -30,9 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // db.delete_meme("meme1")?;
             // let m = db.search_memes("meme", None, None);
             // println!("{:?}", m);
-
             app.manage(db);
-
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -45,6 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             update_meme,
             count_memes,
             show_in_folder,
+            ocr::run_ocr
         ]) // Your custom handler
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
