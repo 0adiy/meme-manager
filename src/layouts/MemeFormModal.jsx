@@ -45,21 +45,13 @@ export default function MemeFormModal() {
   };
 
   const handelFileOpen = async e => {
+    const imageExtensions = ["jpg", "png", "jpeg", "gif", "webp", "heic", "tiff", "bmp"];
     const filePath = await open({
       multiple: false,
       filters: [
         {
           name: "Images",
-          extensions: [
-            "jpg",
-            "png",
-            "jpeg",
-            "gif",
-            "webp",
-            "heic",
-            "tiff",
-            "bmp",
-          ],
+          extensions: imageExtensions,
         },
         {
           name: "Video",
@@ -78,7 +70,20 @@ export default function MemeFormModal() {
         },
       ],
     });
+    if(!filePath) return;
     setLocalPath(filePath);
+    const ext = filePath.split('.').pop()?.toLowerCase();
+    //run ocr only on images
+    if (ext && imageExtensions.includes(ext)) {
+    try {
+      const extractedText = await invoke("run_ocr", { imagePath: filePath });
+      if (extractedText.trim()) {
+        setDescription(extractedText.trim());
+      }
+    } catch (error) {
+      console.error("OCR failed:", error);
+    }
+  }
   };
 
   return (
