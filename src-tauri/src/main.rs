@@ -31,6 +31,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // db.delete_meme("meme1")?;
             // let m = db.search_memes("meme", None, None);
             // println!("{:?}", m);
+
+
+            // OCR test on startup (for downloading models)
+            // in src-tauri/resources btw not root resoucres
+            if let Some(resource_path) = app.path_resolver().resolve_resource("resources/test_meme.jpeg") {
+                let image_path = resource_path.to_string_lossy();
+                println!("Running OCR test...");
+                match ocr::run_ocr_internal(&image_path) {
+                    Ok(text) => {
+                        if text.trim().is_empty() {
+                            println!("OCR ran, but found no text.");
+                        } else {
+                            println!("OCR result on app load:\n{}", text);
+                        }
+                    }
+                    Err(err) => {
+                        eprintln!("OCR test failed: {}", err);
+                    }
+                }
+            } else {
+                eprintln!("test_meme.jpeg not found in resources folder.");
+            }
+
             app.manage(db);
             Ok(())
         })
