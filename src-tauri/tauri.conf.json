@@ -59,6 +59,9 @@
         },
         "wix": null
       },
+      "resources": [
+        "resources/test_meme.jpeg"
+      ],
       "active": true,
       "targets": "all",
       "identifier": "com.bisskut.dev",
